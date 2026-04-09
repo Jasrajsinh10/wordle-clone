@@ -35,30 +35,31 @@ export default function Home() {
     // Load guest stats from sessionStorage
     const savedStats = sessionStorage.getItem('wordle_guest_stats');
     if (savedStats) {
-      setStats(JSON.parse(savedStats));
+      try {
+        setStats(JSON.parse(savedStats));
+      } catch (e) {
+        console.error('Failed to parse guest stats');
+      }
     }
 
-    // Check if user is logged in
-    const token = localStorage.getItem('wordle_token');
-    if (token) {
-      fetchProfile(token);
-    }
+    // Check if user is logged in (via cookie-based profile check)
+    fetchProfile();
   }, []);
 
-  const fetchProfile = async (token: string) => {
+  const fetchProfile = async () => {
     try {
-      const res = await fetch(getApiUrl('/api/users/me/'), {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const res = await fetch(getApiUrl('/users/me/'), {
+        credentials: 'include'
       });
       if (res.ok) {
         const data = await res.json();
         setUser(data);
         setStats({ wins: data.wins, losses: data.losses });
       } else {
-        localStorage.removeItem('wordle_token');
+        setUser(null);
       }
     } catch (err) {
-      localStorage.removeItem('wordle_token');
+      setUser(null);
     }
   };
 
@@ -75,23 +76,22 @@ export default function Home() {
       setMessage(status === 'won' ? 'Splendid!' : `The word was ${targetWord}`);
       
       // Auto-open stats modal after a short delay
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setIsStatsOpen(true);
       }, 2000);
+
+      return () => clearTimeout(timer);
     }
-  }, [status]);
+  }, [status, targetWord]);
 
   const updateStats = async (won: boolean) => {
     if (user) {
-      const token = localStorage.getItem('wordle_token');
       try {
-        const res = await fetch(getApiUrl('/api/users/update-stats/'), {
+        const res = await fetch(getApiUrl('/users/update-stats/'), {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ result: won ? 'win' : 'loss' })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ result: won ? 'win' : 'loss' }),
+          credentials: 'include'
         });
         if (res.ok) {
           const data = await res.json();
@@ -113,16 +113,18 @@ export default function Home() {
   };
 
   const onLoginSuccess = (data: any) => {
-    localStorage.setItem('wordle_token', data.access);
-    fetchProfile(data.access);
+    fetchProfile();
     setIsAuthOpen(false);
   };
 
-  const onLogout = () => {
-    localStorage.removeItem('wordle_token');
-    setUser(null);
-    setStats({ wins: 0, losses: 0 }); // Reset to guest (empty session)
-    sessionStorage.removeItem('wordle_guest_stats');
+  const onLogout = async () => {
+    try {
+      // Clear session/cookies (ideally calling a backend logout endpoint if needed)
+      // For now we just reset local state
+      setUser(null);
+      setStats({ wins: 0, losses: 0 });
+      sessionStorage.removeItem('wordle_guest_stats');
+    } catch (e) {}
   };
 
   const totalGames = stats.wins + stats.losses;

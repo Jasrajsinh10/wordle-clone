@@ -19,16 +19,33 @@ export const AuthForm = ({ onSuccess, onClose }: AuthFormProps) => {
     e.preventDefault();
     setError('');
 
-    const endpoint = isLogin ? '/api/users/login/' : '/api/users/register/';
+    // Basic Sanitization
+    const sanitizedUsername = username.trim();
+    const sanitizedEmail = email.trim();
+    const sanitizedPassword = password; // Usually passwords aren't trimmed
+
+    // Basic Validation
+    if (sanitizedUsername.length < 3) {
+      setError('Username must be at least 3 characters long');
+      return;
+    }
+
+    if (!isLogin && !/^\S+@\S+\.\S+$/.test(sanitizedEmail)) {
+      setError('Invalid email address');
+      return;
+    }
+
+    const endpoint = isLogin ? '/users/login/' : '/users/register/';
     const body = isLogin 
-      ? { username, password } 
-      : { username, email, password };
+      ? { username: sanitizedUsername, password: sanitizedPassword } 
+      : { username: sanitizedUsername, email: sanitizedEmail, password: sanitizedPassword };
 
     try {
       const res = await fetch(getApiUrl(endpoint), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
+        credentials: 'include', // Support HttpOnly cookies
       });
 
       const data = await res.json();

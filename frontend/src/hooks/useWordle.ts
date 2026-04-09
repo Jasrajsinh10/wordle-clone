@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getLetterStates, LetterState } from '../utils/word-logic';
 
-export const useWordle = (targetWord: string) => {
+export const useWordle = (targetWord: string | null) => {
   const [turn, setTurn] = useState(0);
   const [currentGuess, setCurrentGuess] = useState('');
   const [guesses, setGuesses] = useState<(string | null)[]>(Array(6).fill(null));
@@ -13,6 +13,7 @@ export const useWordle = (targetWord: string) => {
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
 
   const formatGuess = () => {
+    if (!targetWord) return [];
     const states = getLetterStates(currentGuess.toUpperCase(), targetWord.toUpperCase());
     
     // Update used keys
@@ -35,22 +36,26 @@ export const useWordle = (targetWord: string) => {
   };
 
   const addNewGuess = () => {
-    if (currentGuess.toUpperCase() === targetWord.toUpperCase()) {
+    if (!targetWord || turn > 5 || currentGuess.length !== 5) return;
+
+    const guess = currentGuess.toUpperCase();
+
+    if (guess === targetWord.toUpperCase()) {
       setIsCorrect(true);
       setStatus('won');
     }
 
     setGuesses((prev) => {
       const newGuesses = [...prev];
-      newGuesses[turn] = currentGuess.toUpperCase();
+      newGuesses[turn] = guess;
       return newGuesses;
     });
 
-    setHistory((prev) => [...prev, currentGuess.toUpperCase()]);
+    setHistory((prev) => [...prev, guess]);
     setTurn((prev) => prev + 1);
     setCurrentGuess('');
 
-    if (turn === 5 && currentGuess.toUpperCase() !== targetWord.toUpperCase()) {
+    if (turn === 5 && guess !== targetWord.toUpperCase()) {
       setStatus('lost');
     }
   };
