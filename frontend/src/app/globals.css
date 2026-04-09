@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-green: #538d4e;
+  --color-brand-yellow: #b59f3b;
+  --color-brand-gray: #3a3a3c;
+  --color-brand-dark: #121213;
+  --color-brand-light: #ffffff;
+}
+
+:root {
+  --background: #121213;
+  --foreground: #ffffff;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-brand-gray;
+  }
+}
+
+.tile {
+  @apply w-14 h-14 border-2 flex items-center justify-center text-3xl font-bold uppercase select-none transition-all duration-300;
+}
+
+.tile-empty {
+  @apply border-brand-gray;
+}
+
+.tile-active {
+  @apply border-gray-500 scale-105;
+}
+
+.tile-correct {
+  @apply bg-brand-green border-brand-green text-white;
+}
+
+.tile-present {
+  @apply bg-brand-yellow border-brand-yellow text-white;
+}
+
+.tile-absent {
+  @apply bg-brand-gray border-brand-gray text-white;
+}
+
+.key {
+  @apply bg-zinc-500 hover:bg-zinc-400 active:bg-zinc-600 rounded-md h-14 flex items-center justify-center font-bold uppercase cursor-pointer select-none transition-colors duration-150;
+}
+
+.key-correct {
+  @apply bg-brand-green hover:bg-green-600;
+}
+
+.key-present {
+  @apply bg-brand-yellow hover:bg-yellow-600;
+}
+
+.key-absent {
+  @apply bg-brand-gray hover:bg-zinc-700;
+}
