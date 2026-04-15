@@ -51,6 +51,7 @@ body {
 
 .key {
   @apply bg-[#818384] hover:bg-[#a1a1a1] active:bg-[#5a5a5a] text-white rounded-[4px] h-[58px] flex items-center justify-center font-bold uppercase cursor-pointer select-none transition-all duration-150;
+  min-width: 40px;
 }
 
 .key-correct {
@@ -64,3 +65,9 @@ body {
 .key-absent {
   @apply bg-[#3a3a3c] border-[#3a3a3c] hover:opacity-90;
 }
+
+/* Ensure the keyboard area has enough space and proper centering */
+.keyboard-row {
+  @apply flex justify-center gap-[5px] mb-[8px] w-full;
+}
+

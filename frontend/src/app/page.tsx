@@ -66,7 +66,15 @@ export default function Home() {
     }
   };
 
-  const { turn, currentGuess, guesses, isCorrect, usedKeys, status, handleKeyup } = useWordle(targetWord || '');
+  const { turn, currentGuess, guesses, isCorrect, usedKeys, status, message: hookMessage, handleKeyup } = useWordle(targetWord || '');
+
+  useEffect(() => {
+    if (hookMessage) {
+      setMessage(hookMessage);
+      const timer = setTimeout(() => setMessage(''), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [hookMessage]);
 
   useEffect(() => {
     window.addEventListener('keyup', handleKeyup);

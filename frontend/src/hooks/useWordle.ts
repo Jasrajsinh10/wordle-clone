@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getLetterStates, LetterState } from '../utils/word-logic';
+import { getApiUrl } from '../utils/api';
 
 export const useWordle = (targetWord: string | null) => {
   const [turn, setTurn] = useState(0);
@@ -12,10 +13,31 @@ export const useWordle = (targetWord: string | null) => {
   const [usedKeys, setUsedKeys] = useState<{ [key: string]: LetterState }>({});
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
 
-  const addNewGuess = () => {
-    if (!targetWord || turn > 5 || currentGuess.length !== 5) return;
+  const [message, setMessage] = useState('');
 
+  const validateAndAddGuess = async () => {
+    if (!targetWord || turn > 5 || currentGuess.length !== 5) return;
+    
     const guess = currentGuess.toUpperCase();
+    
+    try {
+      const res = await fetch(getApiUrl('/game/validate-word/'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word: guess })
+      });
+      const data = await res.json();
+      
+      if (!data.is_valid) {
+        setMessage('Not in word list');
+        setTimeout(() => setMessage(''), 2000);
+        return;
+      }
+    } catch (err) {
+      console.error('Validation failed', err);
+      // Fallback: allow if validation fails for network reasons
+    }
+
     const states = getLetterStates(guess, targetWord.toUpperCase());
 
     // Update used keys
@@ -59,14 +81,14 @@ export const useWordle = (targetWord: string | null) => {
   const handleKeyup = useCallback(({ key }: { key: string }) => {
     if (status !== 'playing') return;
 
-    if (key === 'Enter') {
+    if (key === 'Enter' || key === 'ENTER') {
       if (turn > 5) return;
       if (history.includes(currentGuess.toUpperCase())) return;
       if (currentGuess.length !== 5) return;
-      addNewGuess();
+      validateAndAddGuess();
     }
 
-    if (key === 'Backspace') {
+    if (key === 'Backspace' || key === 'BACKSPACE') {
       setCurrentGuess((prev) => prev.slice(0, -1));
       return;
     }
@@ -78,5 +100,5 @@ export const useWordle = (targetWord: string | null) => {
     }
   }, [currentGuess, turn, history, status, targetWord]);
 
-  return { turn, currentGuess, guesses, isCorrect, usedKeys, status, handleKeyup };
+  return { turn, currentGuess, guesses, isCorrect, usedKeys, status, message, handleKeyup };
 };
