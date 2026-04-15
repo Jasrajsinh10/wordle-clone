@@ -50,17 +50,17 @@ body {
 }
 
 .key {
-  @apply bg-zinc-500 hover:bg-zinc-400 active:bg-zinc-600 rounded-md h-14 flex items-center justify-center font-bold uppercase cursor-pointer select-none transition-colors duration-150;
+  @apply bg-[#818384] hover:bg-[#a1a1a1] active:bg-[#5a5a5a] text-white rounded-[4px] h-[58px] flex items-center justify-center font-bold uppercase cursor-pointer select-none transition-all duration-150;
 }
 
 .key-correct {
-  @apply bg-brand-green hover:bg-green-600;
+  @apply bg-brand-green border-brand-green hover:opacity-90;
 }
 
 .key-present {
-  @apply bg-brand-yellow hover:bg-yellow-600;
+  @apply bg-brand-yellow border-brand-yellow hover:opacity-90;
 }
 
 .key-absent {
-  @apply bg-brand-gray hover:bg-zinc-700;
+  @apply bg-[#3a3a3c] border-[#3a3a3c] hover:opacity-90;
 }
