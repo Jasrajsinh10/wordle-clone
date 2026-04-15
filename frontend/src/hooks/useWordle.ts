@@ -12,12 +12,13 @@ export const useWordle = (targetWord: string | null) => {
   const [isCorrect, setIsCorrect] = useState(false);
   const [usedKeys, setUsedKeys] = useState<{ [key: string]: LetterState }>({});
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
-
   const [message, setMessage] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const validateAndAddGuess = async () => {
-    if (!targetWord || turn > 5 || currentGuess.length !== 5) return;
+  const validateAndAddGuess = useCallback(async () => {
+    if (!targetWord || turn > 5 || currentGuess.length !== 5 || isProcessing) return;
     
+    setIsProcessing(true);
     const guess = currentGuess.toUpperCase();
     
     try {
@@ -31,6 +32,7 @@ export const useWordle = (targetWord: string | null) => {
       if (!data.is_valid) {
         setMessage('Not in word list');
         setTimeout(() => setMessage(''), 2000);
+        setIsProcessing(false);
         return;
       }
     } catch (err) {
@@ -72,33 +74,36 @@ export const useWordle = (targetWord: string | null) => {
     setHistory((prev) => [...prev, guess]);
     setTurn((prev) => prev + 1);
     setCurrentGuess('');
+    setIsProcessing(false);
 
     if (turn === 5 && guess !== targetWord.toUpperCase()) {
       setStatus('lost');
     }
-  };
+  }, [currentGuess, turn, targetWord, isProcessing, history]);
 
   const handleKeyup = useCallback(({ key }: { key: string }) => {
-    if (status !== 'playing') return;
+    if (status !== 'playing' || isProcessing) return;
 
-    if (key === 'Enter' || key === 'ENTER') {
+    const k = key.toUpperCase();
+
+    if (k === 'ENTER') {
       if (turn > 5) return;
       if (history.includes(currentGuess.toUpperCase())) return;
       if (currentGuess.length !== 5) return;
       validateAndAddGuess();
     }
 
-    if (key === 'Backspace' || key === 'BACKSPACE') {
+    if (k === 'BACKSPACE') {
       setCurrentGuess((prev) => prev.slice(0, -1));
       return;
     }
 
-    if (/^[A-Za-z]$/.test(key)) {
+    if (/^[A-Z]$/.test(k)) {
       if (currentGuess.length < 5) {
-        setCurrentGuess((prev) => prev + key);
+        setCurrentGuess((prev) => prev + k);
       }
     }
-  }, [currentGuess, turn, history, status, targetWord]);
+  }, [currentGuess, turn, history, status, isProcessing, validateAndAddGuess]);
 
   return { turn, currentGuess, guesses, isCorrect, usedKeys, status, message, handleKeyup };
 };
