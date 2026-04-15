@@ -29,7 +29,7 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't', 'y', 'yes')
 
 ALLOWED_HOSTS = ['*']  # Temporarily allow all hosts for debugging
 
@@ -92,6 +92,10 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
+
+# Optional: Ensure database is reachable during startup log
+if os.getenv('DATABASE_URL'):
+    print("PostgreSQL configuration detected via DATABASE_URL")
 
 
 # Password validation
