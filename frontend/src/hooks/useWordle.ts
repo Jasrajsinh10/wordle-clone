@@ -12,33 +12,29 @@ export const useWordle = (targetWord: string | null) => {
   const [usedKeys, setUsedKeys] = useState<{ [key: string]: LetterState }>({});
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
 
-  const formatGuess = () => {
-    if (!targetWord) return [];
-    const states = getLetterStates(currentGuess.toUpperCase(), targetWord.toUpperCase());
-    
-    // Update used keys
-    const newUsedKeys = { ...usedKeys };
-    currentGuess.toUpperCase().split('').forEach((l, i) => {
-      const currentState = states[i];
-      const prevState = newUsedKeys[l];
-
-      if (currentState === 'correct') {
-        newUsedKeys[l] = 'correct';
-      } else if (currentState === 'present' && prevState !== 'correct') {
-        newUsedKeys[l] = 'present';
-      } else if (currentState === 'absent' && prevState !== 'correct' && prevState !== 'present') {
-        newUsedKeys[l] = 'absent';
-      }
-    });
-
-    setUsedKeys(newUsedKeys);
-    return states;
-  };
-
   const addNewGuess = () => {
     if (!targetWord || turn > 5 || currentGuess.length !== 5) return;
 
     const guess = currentGuess.toUpperCase();
+    const states = getLetterStates(guess, targetWord.toUpperCase());
+
+    // Update used keys
+    setUsedKeys((prev) => {
+      const newUsedKeys = { ...prev };
+      guess.split('').forEach((char, i) => {
+        const letterState = states[i];
+        const prevState = newUsedKeys[char];
+
+        if (letterState === 'correct') {
+          newUsedKeys[char] = 'correct';
+        } else if (letterState === 'present' && prevState !== 'correct') {
+          newUsedKeys[char] = 'present';
+        } else if (letterState === 'absent' && prevState !== 'correct' && prevState !== 'present') {
+          newUsedKeys[char] = 'absent';
+        }
+      });
+      return newUsedKeys;
+    });
 
     if (guess === targetWord.toUpperCase()) {
       setIsCorrect(true);

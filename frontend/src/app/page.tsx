@@ -19,12 +19,15 @@ export default function Home() {
 
   // Fetch random word
   const fetchWord = async () => {
+    const url = getApiUrl('/api/game/random-word/');
     try {
-      const res = await fetch(getApiUrl('/api/game/random-word/'));
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setTargetWord(data.word.toUpperCase());
     } catch (err) {
-      console.error('Failed to fetch word', err);
+      console.error(`Failed to fetch word from ${url}:`, err);
+      // If you see a CORS error in the browser console, update CORS_ALLOWED_ORIGINS in Render.
       setTargetWord('APPLE'); // Fallback
     }
   };
