@@ -19,7 +19,7 @@ export default function Home() {
 
   // Fetch random word
   const fetchWord = async () => {
-    const url = getApiUrl('/api/game/random-word/');
+    const url = getApiUrl('/game/random-word/');
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
