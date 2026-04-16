@@ -77,9 +77,11 @@ export default function Home() {
   }, [hookMessage]);
 
   useEffect(() => {
-    window.addEventListener('keyup', handleKeyup);
-    return () => window.removeEventListener('keyup', handleKeyup);
-  }, [handleKeyup]);
+    if (!isAuthOpen && !isStatsOpen) {
+      window.addEventListener('keyup', handleKeyup);
+      return () => window.removeEventListener('keyup', handleKeyup);
+    }
+  }, [handleKeyup, isAuthOpen, isStatsOpen]);
 
   useEffect(() => {
     if (status !== 'playing' && targetWord) {
@@ -130,12 +132,19 @@ export default function Home() {
 
   const onLogout = async () => {
     try {
-      // Clear session/cookies (ideally calling a backend logout endpoint if needed)
-      // For now we just reset local state
+      // Clear HTTP-only cookie on backend
+      await fetch(getApiUrl('/users/logout/'), {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      // Clear local state
       setUser(null);
       setStats({ wins: 0, losses: 0 });
       sessionStorage.removeItem('wordle_guest_stats');
-    } catch (e) {}
+    } catch (e) {
+      console.error('Logout failed:', e);
+    }
   };
 
   const totalGames = stats.wins + stats.losses;

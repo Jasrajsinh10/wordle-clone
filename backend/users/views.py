@@ -56,3 +56,16 @@ class UpdateStatsView(APIView):
             user.save()
         
         return Response(UserSerializer(user).data)
+
+class LogoutView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request):
+        response = Response({'message': 'Logged out successfully'}, status=status.HTTP_200_OK)
+        # Clear the cookie
+        response.delete_cookie(
+            key=settings.SIMPLE_JWT['AUTH_COOKIE'],
+            path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH'],
+            samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+        )
+        return response

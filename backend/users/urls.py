@@ -4,12 +4,14 @@ from .views import (
     RegisterView, 
     ProfileView, 
     UpdateStatsView, 
-    CookieTokenObtainPairView
+    CookieTokenObtainPairView,
+    LogoutView
 )
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', CookieTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('me/', ProfileView.as_view(), name='profile'),
     path('update-stats/', UpdateStatsView.as_view(), name='update_stats'),
