@@ -22,16 +22,14 @@ export const useWordle = (targetWord: string | null) => {
     const guess = currentGuess.toUpperCase();
     
     try {
-      const res = await fetch(getApiUrl('/game/validate-word/'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ word: guess })
-      });
+      const res = await fetch(`https://api.datamuse.com/words?sp=${guess.toLowerCase()}&max=1`);
       const data = await res.json();
       
-      if (!data.is_valid) {
-        setMessage('Not in word list');
-        setTimeout(() => setMessage(''), 2000);
+      const isValid = data.length > 0 && data[0].word.toLowerCase() === guess.toLowerCase();
+      
+      if (!isValid) {
+        setMessage('not valid');
+        setTimeout(() => setMessage(''), 1000);
         setIsProcessing(false);
         return;
       }

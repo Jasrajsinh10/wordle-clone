@@ -71,7 +71,7 @@ export default function Home() {
   useEffect(() => {
     if (hookMessage) {
       setMessage(hookMessage);
-      const timer = setTimeout(() => setMessage(''), 2000);
+      const timer = setTimeout(() => setMessage(''), 1000);
       return () => clearTimeout(timer);
     }
   }, [hookMessage]);
